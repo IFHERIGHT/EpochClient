@@ -1,0 +1,41 @@
+package thus.epoch.utils.misc;
+
+import net.minecraft.util.ResourceLocation;
+import thus.epoch.utils.Utils;
+
+import javax.sound.sampled.*;
+import java.io.IOException;
+import java.io.InputStream;
+
+public class SoundUtils implements Utils {
+    private static Clip clip;
+
+    public static void playSound(ResourceLocation resourceLocation, boolean loop) throws UnsupportedAudioFileException, IOException, LineUnavailableException {
+        InputStream audioSrc = mc.getResourceManager().getResource(resourceLocation).getInputStream();
+        AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioSrc);
+        clip = AudioSystem.getClip();
+        clip.open(audioStream);
+        clip.loop(loop ? Clip.LOOP_CONTINUOUSLY : 0);
+        clip.start();
+    }
+    public static void stopSounds() {
+        if (clip != null && clip.isRunning()) {
+            clip.stop();
+        }
+    }
+
+    public static void setVolume(float volume) {
+        if (clip != null) {
+            FloatControl volumeControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+            float min = volumeControl.getMinimum();
+            float max = volumeControl.getMaximum();
+            float newVolume = min + (max - min) * volume;
+            volumeControl.setValue(newVolume);
+        }
+    }
+
+    public static boolean isPlaying() {
+        return clip != null && clip.isRunning();
+    }
+
+}
